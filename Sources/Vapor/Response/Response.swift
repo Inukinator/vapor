@@ -90,3 +90,18 @@ public final class Response: ContainerAlias, HTTPMessageContainer, ResponseCodab
         return req.eventLoop.newSucceededFuture(result: self)
     }
 }
+
+extension Response {
+    /// Pass in a `Model`, return said model as a file
+    public func fileResponse(file: <Model>, on: req) throws -> Future<Response> {
+            return try req.parameters.next(<Model>.self).map { obj in
+                let file: File = obj.file
+                let headers: HTTPHeaders = [
+                "content-disposition": "attachment; filename=\"\(file.filename)\""
+                ]
+                let httpResp = HTTPResponse(headers: headers, body: file.data)
+                let res = Response(http: httpResp, using: req)
+                return res
+        }
+    }
+}
